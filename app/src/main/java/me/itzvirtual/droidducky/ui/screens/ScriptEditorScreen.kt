@@ -1,7 +1,12 @@
 package me.itzvirtual.droidducky.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -97,28 +102,62 @@ fun ScriptEditorScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                OutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = onContentChange,
+                val textFieldState = rememberTextFieldState(uiState.content)
+                
+                // Sync external state changes to the text field
+                LaunchedEffect(uiState.content) {
+                    if (textFieldState.text.toString() != uiState.content) {
+                        textFieldState.edit {
+                            replace(0, length, uiState.content)
+                        }
+                    }
+                }
+                
+                // Notify parent of content changes
+                LaunchedEffect(textFieldState.text) {
+                    val newContent = textFieldState.text.toString()
+                    if (newContent != uiState.content) {
+                        onContentChange(newContent)
+                    }
+                }
+                
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp),
-                    textStyle = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    placeholder = {
-                        Text(
-                            text = "Enter your script commands here...\n\nExample:\nSTRING Hello World\nENTER\nDELAY 100",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        .imePadding()
+                        .padding(16.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp)
                         )
-                    }
-                )
+                        .padding(16.dp)
+                ) {
+                    BasicTextField(
+                        state = textFieldState,
+                        modifier = Modifier.fillMaxSize(),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        lineLimits = TextFieldLineLimits.MultiLine(),
+                        decorator = { innerTextField ->
+                            if (textFieldState.text.isEmpty()) {
+                                Text(
+                                    text = "Enter your script commands here...\n\nExample:\nSTRING Hello World\nENTER\nDELAY 100",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
             }
         }
     }
