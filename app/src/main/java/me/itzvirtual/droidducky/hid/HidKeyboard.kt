@@ -1,6 +1,7 @@
 package me.itzvirtual.droidducky.hid
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -29,7 +30,7 @@ class HidKeyboard(private val devicePath: String) {
      * Send a single key press with optional modifiers
      */
     suspend fun sendKey(modifier: Byte, keyCode: Byte) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO + NonCancellable) {
             // Press key
             writeReport(modifier, keyCode)
             delay(KEY_PRESS_DELAY_MS)
@@ -43,7 +44,7 @@ class HidKeyboard(private val devicePath: String) {
      * Send multiple modifiers with a key
      */
     suspend fun sendKey(modifiers: Int, keyCode: Byte) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO + NonCancellable) {
             writeReport(modifiers.toByte(), keyCode)
             delay(KEY_PRESS_DELAY_MS)
             writeReport(0, 0)
