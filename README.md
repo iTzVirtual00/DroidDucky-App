@@ -6,6 +6,14 @@ An Android application for managing and executing DuckyScript payloads via USB H
 
 - HID gadget device configured at `/dev/hidg0` (configurable)
 
+The app was tested on a Google Pixel 6 running Android 16. I used USB Gadget Tool to create the HID device.
+
+## Screenshots
+
+![Device ready](./screenshots/device_ready.png)
+![Device error](./screenshots/device_error.png)
+![Script editor](./screenshots/script_editor.png)
+
 ## Project Structure
 
 ```
